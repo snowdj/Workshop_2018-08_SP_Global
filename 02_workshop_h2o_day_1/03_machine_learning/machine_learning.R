@@ -32,8 +32,8 @@ application_train_raw_tbl
 set.seed(1234)
 split_obj <- initial_split(application_train_raw_tbl, prop = 0.15)
 
-training(split_obj)
-testing(split_obj)
+training(split_obj) # 15% of Data
+testing(split_obj)  # 85% of Data
 
 
 # 4.0 PREPROCESSING ----
@@ -95,10 +95,10 @@ predict_glm <- predict(model_glm,
                        type = "response")
 
 # NOT RUN
-# tibble(actual  = test_tbl$TARGET, 
-#        predict = predict_glm) %>%
-#     mutate(predict_class = ifelse(predict > 0.5, 1, 0) %>% as.factor()) %>%
-#     roc_auc(actual, predict) 
+tibble(actual  = test_tbl$TARGET,
+       predict = predict_glm) %>%
+    mutate(predict_class = ifelse(predict > 0.5, 1, 0) %>% as.factor()) %>%
+    roc_auc(actual, predict)
 
 # [1] 0.7396841
 
@@ -133,6 +133,7 @@ h2o_glm <- h2o.glm(
 
 h2o.performance(h2o_glm, valid = TRUE) %>%
     h2o.auc()
+# [1] 0.7416916
 
 h2o_glm@allparameters
 
@@ -156,8 +157,7 @@ h2o_gbm <- h2o.gbm(
 
 h2o.performance(h2o_gbm, valid = TRUE) %>%
     h2o.auc()
-
-h2o.performance(h2o_gbm, valid = TRUE)
+# [1] 0.7411573
 
 h2o_gbm@allparameters
 
@@ -180,6 +180,7 @@ h2o_rf <- h2o.randomForest(
 
 h2o.performance(h2o_rf, valid = TRUE) %>%
     h2o.auc()
+# [1] 0.728683
 
 h2o_rf@allparameters
 
@@ -210,24 +211,24 @@ automl_results@leaderboard %>%
 
 # 5.3.2 Getting Models ----
 
-h2o_01_se  <- h2o.getModel("StackedEnsemble_BestOfFamily_0_AutoML_20180827_160455")
-h2o_03_glm <- h2o.getModel("GLM_grid_0_AutoML_20180827_160455_model_0")
-h2o_04_gbm <- h2o.getModel("GBM_grid_0_AutoML_20180827_160455_model_11")
-h2o_13_dl  <- h2o.getModel("DeepLearning_0_AutoML_20180827_160455")
-h2o_14_rf  <- h2o.getModel("XRT_0_AutoML_20180827_160455")
+h2o_01_se  <- h2o.getModel("StackedEnsemble_AllModels_0_AutoML_20180904_113915")
+h2o_03_glm <- h2o.getModel("GLM_grid_0_AutoML_20180904_113915_model_0")
+h2o_04_gbm <- h2o.getModel("GBM_grid_0_AutoML_20180904_113915_model_13")
+
 
 # 5.3.3 Saving & Loading ----
 
-h2o.saveModel(h2o_14_rf, "03_machine_learning_1/models/")
+h2o.saveModel(h2o_01_se, "03_machine_learning/models/")
 
 h2o.loadModel("03_machine_learning_1/models/GBM_grid_0_AutoML_20180827_160455_model_11")
 
 # 5.3.4 Performance Metrics -----
 
-performance_h2o <- h2o.performance(h2o_01_se, valid = TRUE)
+performance_h2o <- h2o.performance(h2o_02_se, valid = TRUE)
 
 performance_h2o %>%
     h2o.auc()
+# [1] 0.7476822
 
 # 5.3.5 Making Predictions -----
 
