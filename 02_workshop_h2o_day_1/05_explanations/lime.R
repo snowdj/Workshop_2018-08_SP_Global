@@ -75,8 +75,7 @@ test_tbl  <- bake(rec_obj, testing(split_obj))
 
 h2o.init()
 
-h2o_01_se <- h2o.loadModel("03_machine_learning/models/StackedEnsemble_BestOfFamily_0_AutoML_20180827_160455")
-
+h2o_01_se <- h2o.loadModel("03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 h2o_01_se
 
 
