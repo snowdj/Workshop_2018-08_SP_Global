@@ -78,7 +78,7 @@ test_tbl  <- bake(rec_obj, testing(split_obj))
 
 h2o.init()
 
-h2o_01_se <- h2o.loadModel("03_machine_learning/models/StackedEnsemble_BestOfFamily_0_AutoML_20180827_160455")
+h2o_01_se <- h2o.loadModel("03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 
 
 metrics_01_se_tbl <- h2o_01_se %>%
@@ -86,20 +86,23 @@ metrics_01_se_tbl <- h2o_01_se %>%
     h2o.metric() %>%
     as.tibble()
 
-metrics_01_se_tbl %>% glimpse()
+metrics_01_se_tbl %>% View("metrics")
 
 # 6.1 ROC Plot
 
 metrics_01_se_tbl %>%
     ggplot(aes(fpr, tpr)) +
-    geom_point() +
-    ggtitle("ROC Plot")
+    geom_point(color = palette_light()[[1]]) +
+    theme_tq() +
+    ggtitle("ROC Plot") 
+    
 
 # 6.2 Precision Vs Recall Plot
 
 metrics_01_se_tbl %>%
     ggplot(aes(recall, precision)) +
-    geom_point() + 
+    geom_point(color = palette_light()[[1]]) + 
+    theme_tq() +
     ggtitle("Precision VS Recall")
 
 
@@ -114,8 +117,9 @@ gain_lift_01_se_tbl
 
 gain_lift_01_se_tbl %>%
     ggplot(aes(cumulative_data_fraction, cumulative_lift)) +
-    geom_point() + 
-    geom_line() +
+    geom_point(color = palette_light()[[3]]) + 
+    geom_line(color = palette_light()[[3]]) +
+    theme_tq() + 
     ggtitle("Cumulative Lift Plot")
 
 
@@ -126,11 +130,13 @@ load_performance_metrics <- function(path) {
     model_h2o <- h2o.loadModel(path)
     perf_h2o  <- h2o.performance(model_h2o, valid = T) 
     
-    perf_h2o %>%
+    performance_tbl <- perf_h2o %>%
         h2o.metric() %>%
         as.tibble() %>%
         mutate(auc = h2o.auc(perf_h2o)) %>%
         select(tpr, fpr, auc, precision, recall)
+    
+    return(performance_tbl)
     
 }
 
@@ -159,4 +165,5 @@ g <- model_metrics_tbl %>%
     scale_color_tq() +
     ggtitle("ROC Plot") 
     
-ggplotly(g)
+ggplotly(g) %>%
+    layout(showlegend = FALSE)
