@@ -25,8 +25,8 @@ library(glue)
 
 # Data
 predictions_tbl <- readRDS("00_data/predictions_tbl.rds")
-train_tbl <- readRDS("00_data/train_tbl.rds")
-test_tbl <- readRDS("00_data/test_tbl.rds")
+train_tbl       <- readRDS("00_data/train_tbl.rds")
+test_tbl        <- readRDS("00_data/test_tbl.rds")
 
 # H2O Model
 h2o.init()
@@ -52,12 +52,17 @@ Sidebar {.sidebar}
 
 ```{r}
 # Selection
-applicant_ids <- unique(predictions_tbl$SK_ID_CURR) %>% as.character()
+applicant_ids <- predictions_tbl %>%
+        pull(SK_ID_CURR) %>%
+        unique() %>%
+        as.character()
 
-selectInput("applicant_id", 
-            label = NULL, 
+selectInput("applicant_id",
+            label = NULL,
             applicant_ids)
 ```
+
+
 
 ***
 
@@ -71,15 +76,15 @@ h3(textOutput("default_prediction"), class="text-center")
 ```{r}
 output$default_prediction <- renderText({
     req(input$applicant_id)
-    
+
     selected_applicant_id <- predictions_tbl$SK_ID_CURR[[1]]
     selected_applicant_id <- input$applicant_id
-    
+
     applicant_tbl <- predictions_tbl %>%
         filter(SK_ID_CURR == selected_applicant_id)
-    
+
     default_prediction <- applicant_tbl$predict
-    
+
     ifelse(default_prediction == 1, "Yes", "No")
 })
 ```
@@ -94,17 +99,17 @@ gaugeOutput("default_risk", width = "220px", height = "130px")
 
 ```{r, context="server"}
 output$default_risk <- renderGauge({
-    
+
     req(input$applicant_id)
-    
+
     selected_applicant_id <- predictions_tbl$SK_ID_CURR[[1]]
     selected_applicant_id <- input$applicant_id
-    
+
     applicant_tbl <- predictions_tbl %>%
         filter(SK_ID_CURR == selected_applicant_id)
-    
+
     prob_of_default <- applicant_tbl$p1
-    
+
     gauge(
         value = round(prob_of_default * 100, digits = 1),
         min = 0,
@@ -158,29 +163,29 @@ valueBoxOutput("ext_source_1")
 
 ```{r, context="server"}
 output$ext_source_1 <- renderValueBox({
-    
+
     req(input$applicant_id)
-    
+
     selected_applicant_id <- predictions_tbl$SK_ID_CURR[[1]]
     selected_applicant_id <- input$applicant_id
-    
+
     ext_source_median <- median(predictions_tbl$EXT_SOURCE_1)
-    
+
     applicant_tbl <- predictions_tbl %>%
         filter(SK_ID_CURR == selected_applicant_id)
-    
+
     ext_source_value <- applicant_tbl$EXT_SOURCE_1
-    
+
     ext_source_caption <- glue(
         "{round(ext_source_value, 2)} (Median: {round(ext_source_median, 2)})"
     )
-    
+
     valueBox(
         "Ext Source 1",
         caption = ext_source_caption,
         color = "#2c3e50"
     )
-    
+
 })
 ```
 
@@ -194,29 +199,29 @@ valueBoxOutput("ext_source_2")
 
 ```{r, context="server"}
 output$ext_source_2 <- renderValueBox({
-    
+
     req(input$applicant_id)
-    
+
     selected_applicant_id <- predictions_tbl$SK_ID_CURR[[1]]
     selected_applicant_id <- input$applicant_id
-    
+
     ext_source_median <- median(predictions_tbl$EXT_SOURCE_2)
-    
+
     applicant_tbl <- predictions_tbl %>%
         filter(SK_ID_CURR == selected_applicant_id)
-    
+
     ext_source_value <- applicant_tbl$EXT_SOURCE_2
-    
+
     ext_source_caption <- glue(
         "{round(ext_source_value, 2)} (Median: {round(ext_source_median, 2)})"
     )
-    
+
     valueBox(
         "Ext Source 2",
         caption = ext_source_caption,
         color = "#e31a1c"
     )
-    
+
 })
 ```
 
@@ -229,29 +234,29 @@ valueBoxOutput("ext_source_3")
 
 ```{r, context="server"}
 output$ext_source_3 <- renderValueBox({
-    
+
     req(input$applicant_id)
-    
+
     selected_applicant_id <- predictions_tbl$SK_ID_CURR[[1]]
     selected_applicant_id <- input$applicant_id
-    
+
     ext_source_median <- median(predictions_tbl$EXT_SOURCE_3)
-    
+
     applicant_tbl <- predictions_tbl %>%
         filter(SK_ID_CURR == selected_applicant_id)
-    
+
     ext_source_value <- applicant_tbl$EXT_SOURCE_3
-    
+
     ext_source_caption <- glue(
         "{round(ext_source_value, 2)} (Median: {round(ext_source_median, 2)})"
     )
-    
+
     valueBox(
         "Ext Source 3",
         caption = ext_source_caption,
         color = "#18BC9C"
     )
-    
+
 })
 ```
 
@@ -260,12 +265,12 @@ Row 2: Applicant Analysis
 
 ```{r}
 lime_input <- reactive({
-    
+
     req(input$applicant_id)
-    
+
     selected_applicant_id <- predictions_tbl$SK_ID_CURR[[1]]
     selected_applicant_id <- input$applicant_id
-    
+
     # LIME
     explainer <- train_tbl %>%
         select(-TARGET) %>%
@@ -275,7 +280,7 @@ lime_input <- reactive({
             n_bins          = 4,
             quantile_bins   = TRUE
         )
-    
+
     explanation <- test_tbl %>%
         filter(SK_ID_CURR == selected_applicant_id) %>%
         select(-TARGET) %>%
@@ -287,7 +292,7 @@ lime_input <- reactive({
             kernel_width   = 1,
             feature_select = "forward_selection"
         )
-    
+
     explanation
 })
 ```
@@ -300,7 +305,7 @@ dataTableOutput("lime_metrics")
 
 ```{r}
 output$lime_metrics <- renderDataTable({
-    
+
     label      <- unique(lime_input()$label)[[1]]
     label_prob <- unique(lime_input()$label_prob)[[1]]
     model_r2   <- unique(lime_input()$model_r2)[[1]]
@@ -311,13 +316,13 @@ output$lime_metrics <- renderDataTable({
         `Model R2`          = round(model_r2, 2)
     ) %>%
         gather(key = "Metric", value = "Value")
-    
+
     DT::datatable(
         lime_metrics_tbl,
         rownames = NULL,
         options = list(
-            dom = 't', 
-            bSort = FALSE, 
+            dom = 't',
+            bSort = FALSE,
             paging = FALSE
         )
     )
@@ -332,7 +337,7 @@ billboarderOutput('lime_explanation')
 
 ```{r, context="server"}
 output$lime_explanation <- renderBillboarder({
-    
+
     explanation_transformed_tbl <- lime_input() %>%
         as.tibble() %>%
         select(feature:feature_desc) %>%
@@ -341,7 +346,7 @@ output$lime_explanation <- renderBillboarder({
         mutate(feature_desc = as_factor(feature_desc) %>%
                    fct_reorder(abs(feature_weight))) %>%
         arrange(desc(feature_desc))
-    
+
     billboarder(data = explanation_transformed_tbl) %>%
         bb_aes(x = feature_desc, y = feature_weight, group = direction) %>%
         bb_barchart(rotated = TRUE, stacked = TRUE) %>%
@@ -352,8 +357,8 @@ output$lime_explanation <- renderBillboarder({
         ) %>%
         bb_tooltip(format = list(
             value = htmlwidgets::JS("function(x) {return parseFloat(x).toFixed(3)}")
-        )) 
-    
+        ))
+
 })
 ```
 
