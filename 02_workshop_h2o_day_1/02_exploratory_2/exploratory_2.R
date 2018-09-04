@@ -142,7 +142,7 @@ missing_tbl <- application_train_raw_tbl %>%
     gather() %>%
     arrange(desc(value))
 
-emissing_tbl
+missing_tbl
 
 missing_tbl %>%
     filter(value > 0) %>%
@@ -224,16 +224,15 @@ app_train_bake_tbl %>%
 # dplyr, ggplot2 tutorial
 
 app_train_cor <- app_train_bake_tbl %>%
-    cor() # Parallelize -----
+    cor(y = .$TARGET_X1) 
 
 min_cor_value <- 0.04
 
 cor_tbl <- app_train_cor %>%
     as.data.frame() %>%
-    as.tibble() %>%
     rownames_to_column(var = "features") %>%
-    select(features, TARGET_X1) %>%
-    rename(value = TARGET_X1) %>%
+    as.tibble() %>%
+    rename(value = V1) %>%
     filter(abs(value) >= min_cor_value) %>%
     arrange(features) %>%
     mutate(features = stringi::stri_replace_last_regex(features, "_", "__")) %>%
@@ -269,7 +268,8 @@ tidy(rec_obj, number = 5) %>%
 
 
 feature_description_tbl %>%
-    filter(str_detect(Row, "EXT_SOURCE"))
+    filter(str_detect(Row, "EXT_SOURCE")) %>%
+    glimpse()
 
 # Credit Agencies: https://www.credit.com/credit-reports/credit-reporting-agencies/
     
@@ -280,4 +280,5 @@ tidy(rec_obj, number = 5) %>%
     filter(str_detect(terms, "DAYS_BIRTH"))
 
 feature_description_tbl %>%
-    filter(str_detect(Row, "DAYS_BIRTH"))
+    filter(str_detect(Row, "DAYS_BIRTH")) %>%
+    glimpse()
