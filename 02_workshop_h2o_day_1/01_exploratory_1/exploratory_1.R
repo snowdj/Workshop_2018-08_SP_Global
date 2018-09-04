@@ -67,22 +67,22 @@ recovery_rate  <- 0.40
 # Add recovery column (normally 40%)
 
 default_cost_tbl <- data_balance_tbl %>%
-    add_column(exposure = c(avg_loan_value * avg_loan_rate, -1 * avg_loan_value)) %>%
-    mutate(recover_rate = ifelse(exposure < 0, recovery_rate, 0)) %>%
-    mutate(ad = exposure * n) %>%
-    mutate(al  = ead * (1-recover_rate) * prop) %>%
-    mutate(al_text = scales::dollar(el)) %>%
-    mutate(direction = ifelse(ead > 0, "ps (survival)", "pd (default)")) %>%
-    mutate(direction = as.factor(direction) %>% fct_relevel("ps (survival)", after = 0))
+    select(TARGET, n) %>%
+    add_column(unit_cost_benefit = c(avg_loan_value * avg_loan_rate, -1 * avg_loan_value)) %>%
+    mutate(agl_no_recovery = unit_cost_benefit * n) %>%
+    mutate(agl_with_recovery = ifelse(agl_no_recovery < 0, agl_no_recovery * (1-recovery_rate), agl_no_recovery)) %>%
+    mutate(agl_text = scales::dollar(agl_with_recovery)) %>%
+    mutate(direction = ifelse(agl_with_recovery > 0, "positive (gain)", "negative (loss)")) %>%
+    mutate(direction = as.factor(direction) %>% fct_relevel("positive (gain)", after = 0))
 
 default_cost_tbl
 
 default_cost_tbl %>%
     mutate(TARGET = as.factor(TARGET)) %>%
-    ggplot(aes(x = TARGET, y = el)) +
+    ggplot(aes(x = TARGET, y = agl_with_recovery)) +
     geom_col(aes(fill = direction)) +
-    geom_label(aes(label = el_text)) +
-    labs(title = "Cost of Default", subtitle = "application_train.csv") + 
+    geom_label(aes(label = agl_text)) +
+    labs(title = "Cost of Default") + 
     scale_y_continuous(labels = scales::dollar) +
     scale_fill_tq() +
     theme_tq()
@@ -97,12 +97,13 @@ application_train_raw_tbl %>%
 application_train_raw_tbl %>%
     count(NAME_CONTRACT_TYPE)
 
-average_return_tbl <- tibble(
+unit_cost_benefit_tbl <- tibble(
     TARGET = c(0, 1),
-    exposure = c(avg_loan_value*avg_loan_rate, -1*avg_loan_value)
+    unit_cost_benefit = c(avg_loan_value*avg_loan_rate, -1*avg_loan_value)
 )
 
-average_return_tbl
+unit_cost_benefit_tbl
+
 
 contract_type_tbl <- application_train_raw_tbl %>%
     
@@ -112,7 +113,7 @@ contract_type_tbl <- application_train_raw_tbl %>%
     summarize(n = n()) %>%
     ungroup() %>%
     
-    # Group by contract type
+    # # Group by contract type
     group_by(NAME_CONTRACT_TYPE) %>%
     mutate(prop = n / sum(n)) %>%
     mutate(pct_text = paste0(round(prop, 3) * 100, "%")) %>%
@@ -120,14 +121,14 @@ contract_type_tbl <- application_train_raw_tbl %>%
     ungroup() %>%
     
     # Join average_return_tbl
-    left_join(average_return_tbl) %>%
+    left_join(unit_cost_benefit_tbl) %>%
     
     # Calculate ROI
-    mutate(recover_rate = ifelse(exposure < 0, recovery_rate, 0)) %>%
-    mutate(ead = n * exposure * (1 - recover_rate)) %>%
-    mutate(ead_text = scales::dollar(ead)) %>%
-    mutate(direction = ifelse(ead > 0, "ps (survival)", "pd (default)")) %>%
-    mutate(direction = as.factor(direction) %>% fct_relevel("ps (survival)", after = 0))
+    mutate(agl_no_recovery = unit_cost_benefit * n) %>%
+    mutate(agl_with_recovery = ifelse(agl_no_recovery < 0, agl_no_recovery * (1-recovery_rate), agl_no_recovery)) %>%
+    mutate(agl_text = scales::dollar(agl_with_recovery)) %>%
+    mutate(direction = ifelse(agl_with_recovery > 0, "positive (gain)", "negative (loss)")) %>%
+    mutate(direction = as.factor(direction) %>% fct_relevel("positive (gain)", after = 0))
 
 contract_type_tbl
 
@@ -136,12 +137,12 @@ contract_type_tbl %>%
     filter(TARGET == 1) %>%
     mutate(
         NAME_CONTRACT_TYPE = as.factor(NAME_CONTRACT_TYPE) %>% 
-            fct_reorder(ead) %>%
+            fct_reorder(agl_with_recovery) %>%
             fct_rev()
-        ) %>%
+    ) %>%
     
     # Plot
-    ggplot(aes(x = ead, y = NAME_CONTRACT_TYPE)) +
+    ggplot(aes(x = agl_with_recovery, y = NAME_CONTRACT_TYPE)) +
     # Line
     geom_point(color = palette_light()[[2]], size = 6) +
     geom_segment(aes(yend = NAME_CONTRACT_TYPE), xend = 0, 
@@ -149,7 +150,7 @@ contract_type_tbl %>%
     # Vline
     geom_vline(xintercept = 0, linetype = 2) +
     # Label
-    geom_label(aes(label = paste0(ead_text, "\n", pct_text, " Default")), 
+    geom_label(aes(label = paste0(agl_text, "\n", pct_text, " Default")), 
                color = palette_light()[[2]],
                vjust = -0.5) +
     # Aesthetics
@@ -158,7 +159,7 @@ contract_type_tbl %>%
     scale_x_continuous(labels = scales::dollar) +
     labs(
         title = "Default Cost By Contract Type",
-        x = "Exposure At Default",
+        x = "Accounting Loss At Default",
         y = "Contract Type"
     )
     
