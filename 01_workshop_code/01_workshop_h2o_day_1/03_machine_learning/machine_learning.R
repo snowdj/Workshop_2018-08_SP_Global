@@ -94,12 +94,10 @@ predict_glm <- predict(model_glm,
                        newdata = test_tbl %>% select(-c(FLAG_MOBIL, FLAG_DOCUMENT_12)),
                        type = "response")
 
-# NOT RUN
 tibble(actual  = test_tbl$TARGET,
        predict = predict_glm) %>%
     mutate(predict_class = ifelse(predict > 0.5, 1, 0) %>% as.factor()) %>%
     roc_auc(actual, predict)
-
 # [1] 0.7396841
 
 rm(model_glm)

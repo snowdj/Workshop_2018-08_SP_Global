@@ -94,6 +94,8 @@ predictions_tbl
 
 # 6.1 Single Explanation ----
 
+# Resource: http://www.business-science.io/business/2018/06/25/lime-local-feature-interpretation.html
+
 explainer <- train_tbl %>%
     select(-TARGET) %>%
     lime(
@@ -104,15 +106,17 @@ explainer <- train_tbl %>%
     )
 
 explanation <- test_tbl %>%
-    slice(1) %>%
+    slice(2) %>%
     select(-TARGET) %>%
     lime::explain(
         explainer = explainer,
-        n_labels   = 1,
         n_features = 8,
         n_permutations = 10000,
-        kernel_width   = 1,
-        feature_select = "forward_selection"
+        dist_fun = "gower",
+        kernel_width   = 1.5,
+        feature_select = "lasso_path",
+        # n_labels   = 2,
+        labels         = "p1"
     )
 
 explanation %>%
