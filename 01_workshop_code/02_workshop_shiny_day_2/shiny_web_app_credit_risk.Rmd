@@ -12,6 +12,17 @@ runtime: shiny
 
 # Resources
 #   FlexDashboard: https://rmarkdown.rstudio.com/flexdashboard/using.html
+#   Widget Gallery: https://shiny.rstudio.com/gallery/widget-gallery.html
+
+# Objectives
+#   Learn how to build a Shiny Flexdashboard App
+#   Wireframing
+#   Working with HTML + CSS
+#   Creating UI widgets
+#   Working with reactive components
+#   Working with models inside of Shiny, Pros / Cons
+#   Working billboarder and DT
+#   Integrating everything into a Shiny Flexdasboard app!
 
 # Libraries
 library(shiny)
