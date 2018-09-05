@@ -211,16 +211,16 @@ automl_results@leaderboard %>%
 
 # 5.3.2 Getting Models ----
 
-h2o_01_se  <- h2o.getModel("StackedEnsemble_AllModels_0_AutoML_20180904_113915")
-h2o_03_glm <- h2o.getModel("GLM_grid_0_AutoML_20180904_113915_model_0")
-h2o_04_gbm <- h2o.getModel("GBM_grid_0_AutoML_20180904_113915_model_13")
+h2o_01_se  <- h2o.getModel("StackedEnsemble_BestOfFamily_0_AutoML_20180905_071103")
+h2o_03_glm <- h2o.getModel("GLM_grid_0_AutoML_20180905_071103_model_0")
+h2o_04_gbm <- h2o.getModel("GBM_grid_0_AutoML_20180905_071103_model_13")
 
 
 # 5.3.3 Saving & Loading ----
 
-h2o.saveModel(h2o_01_se, "03_machine_learning/models/")
+h2o.saveModel(h2o_04_gbm, "00_models")
 
-h2o.loadModel("03_machine_learning_1/models/GBM_grid_0_AutoML_20180827_160455_model_11")
+h2o.loadModel("03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 
 # 5.3.4 Performance Metrics -----
 
