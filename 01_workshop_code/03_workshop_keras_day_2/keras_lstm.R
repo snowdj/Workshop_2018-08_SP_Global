@@ -5,7 +5,7 @@
 #   Time series visualization techniques
 #   Backtesting techniques for sampling time series
 #   Working with Keras
-#   Scaling Models from one to many
+#   Scaling Models from one to many with purrr
 #   Predicting future values
 
 # Estimated time: 4 hr

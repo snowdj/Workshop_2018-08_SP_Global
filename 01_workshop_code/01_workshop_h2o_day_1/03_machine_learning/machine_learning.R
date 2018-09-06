@@ -133,6 +133,10 @@ h2o.performance(h2o_glm, valid = TRUE) %>%
     h2o.auc()
 # [1] 0.7416916
 
+h2o.saveModel(h2o_glm, "03_machine_learning/models/")
+
+h2o.loadModel("03_machine_learning/models/GLM_model_R_1536254907503_1")
+
 h2o_glm@allparameters
 
 # 5.2.3 GBM ----
