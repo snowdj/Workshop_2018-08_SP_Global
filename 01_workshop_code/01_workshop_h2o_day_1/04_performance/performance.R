@@ -1,5 +1,7 @@
 # PERFORMANCE ----
 
+# IMPORTANT: RESTART R SESSION PRIOR TO BEGINNING ----
+
 # Objectives:
 #   Walk through Single Model Performance
 #   Extend to Multiple Models For Comparison 
@@ -78,7 +80,7 @@ test_tbl  <- bake(rec_obj, testing(split_obj))
 
 h2o.init()
 
-h2o_01_se <- h2o.loadModel("03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
+h2o_01_se <- h2o.loadModel("00_models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 
 
 metrics_01_se_tbl <- h2o_01_se %>%
@@ -88,7 +90,7 @@ metrics_01_se_tbl <- h2o_01_se %>%
 
 metrics_01_se_tbl %>% View("metrics")
 
-# 6.1 ROC Plot
+# 5.1 ROC Plot
 
 metrics_01_se_tbl %>%
     ggplot(aes(fpr, tpr)) +
@@ -97,7 +99,7 @@ metrics_01_se_tbl %>%
     ggtitle("ROC Plot") 
     
 
-# 6.2 Precision Vs Recall Plot
+# 5.2 Precision Vs Recall Plot
 
 metrics_01_se_tbl %>%
     ggplot(aes(recall, precision)) +
@@ -106,7 +108,7 @@ metrics_01_se_tbl %>%
     ggtitle("Precision VS Recall")
 
 
-# 6.3 Gain / Lift Plot
+# 5.3 Gain / Lift Plot
 
 gain_lift_01_se_tbl <- h2o_01_se %>%
     h2o.performance(valid = T) %>%
@@ -142,8 +144,7 @@ load_performance_metrics <- function(path) {
 
 safe_load_performance_metrics <- possibly(load_performance_metrics, NA)
 
-model_metrics_tbl <- dir_info("03_machine_learning/models/") %>%
-    filter(size > 500) %>%
+model_metrics_tbl <- dir_info("00_models/") %>%
     select(path) %>%
     mutate(metrics = map(path, safe_load_performance_metrics)) %>%
     unnest() %>%

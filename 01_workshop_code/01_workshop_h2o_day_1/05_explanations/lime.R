@@ -1,4 +1,6 @@
-# PERFORMANCE ----
+# LIME FEATURE EXPLANATIONS ----
+
+# IMPORTANT: RESTART R SESSION PRIOR TO BEGINNING ----
 
 # Objectives:
 #   Single Explanation
@@ -75,7 +77,7 @@ test_tbl  <- bake(rec_obj, testing(split_obj))
 
 h2o.init()
 
-h2o_01_se <- h2o.loadModel("03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
+h2o_01_se <- h2o.loadModel("00_models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 h2o_01_se
 
 

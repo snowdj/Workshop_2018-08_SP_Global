@@ -1,5 +1,7 @@
 # MACHINE LEARNING ----
 
+# IMPORTANT: RESTART R SESSION PRIOR TO BEGINNING ----
+
 # Objectives:
 #   Data preparation
 #   Show simple base R methods: Logistic Regression
@@ -133,9 +135,9 @@ h2o.performance(h2o_glm, valid = TRUE) %>%
     h2o.auc()
 # [1] 0.7416916
 
-h2o.saveModel(h2o_glm, "03_machine_learning/models/")
+h2o.saveModel(h2o_glm, "00_models/")
 
-h2o.loadModel("03_machine_learning/models/GLM_model_R_1536254907503_1")
+h2o.loadModel("00_models/GLM_model_R_1536254907503_1")
 
 h2o_glm@allparameters
 
@@ -222,7 +224,7 @@ h2o_04_gbm <- h2o.getModel("GBM_grid_0_AutoML_20180905_071103_model_13")
 
 h2o.saveModel(h2o_04_gbm, "00_models")
 
-h2o.loadModel("03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
+h2o.loadModel("00_models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 
 # 5.3.4 Performance Metrics -----
 

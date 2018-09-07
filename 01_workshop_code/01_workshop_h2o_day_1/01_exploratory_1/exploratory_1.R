@@ -1,5 +1,7 @@
 # EXPLORATORY DATA ANALYSIS: PART 1 ----
 
+# IMPORTANT: RESTART R SESSION PRIOR TO BEGINNING ----
+
 # Objectives:
 #   Build data wrangling & visualization skills
 #   Learn how to size the problem: What is the cost of default?

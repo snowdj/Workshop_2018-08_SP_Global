@@ -1,5 +1,7 @@
 # EXPLORATORY DATA ANALYSIS: PART 2 ----
 
+# IMPORTANT: RESTART R SESSION PRIOR TO BEGINNING ----
+
 # Objectives:
 #   Effient Exploration, introduction to recipes package, advanced dplyr/ggplot2
 #   Optional - Working with directory / many files
