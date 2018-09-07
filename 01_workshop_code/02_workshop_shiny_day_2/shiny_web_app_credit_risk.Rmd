@@ -41,7 +41,7 @@ test_tbl        <- readRDS("00_data/test_tbl.rds")
 
 # H2O Model
 h2o.init()
-h2o_model <- h2o.loadModel("../01_workshop_h2o_day_1/03_machine_learning/models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
+h2o_model <- h2o.loadModel("../01_workshop_h2o_day_1/00_models/StackedEnsemble_AllModels_0_AutoML_20180904_113915")
 
 
 ```
