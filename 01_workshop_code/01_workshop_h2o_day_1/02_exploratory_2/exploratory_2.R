@@ -20,8 +20,9 @@
 
 library(tidyverse)
 library(tidyquant)
-library(fs) # Optional      
+library(fs)       
 library(recipes)
+library(rsample)
 
 
 # 1.2 Directory (Optional) ----
@@ -49,81 +50,13 @@ dir_info_tbl %>%
     select(path, size)
 
 
-
-
-# 1.3 Data (Optional) ----
-
-# application_train_raw_tbl <- read_csv("00_data/application_train.csv")
-
-# 1.3.1 Working with a bunch of files ----
-
-directory_data <- dir_info_tbl %>%
-    filter(str_detect(path, ".csv")) %>%
-    select(path, size) %>%
-    mutate(data = map(path, read_csv))
-
-directory_data
-
-directory_data %>%
-    filter(str_detect(path, "application_train")) %>%
-    select(data) %>%
-    unnest()
-
-"00_data/application_test.csv" %>% 
-    str_split("/|\\.",simplify = T) %>% 
-    .[,2]
-
-directory_data <- directory_data %>%
-    mutate(name = str_split(path, "/|\\.", simplify = T) %>% .[,2]) %>%
-    select(name, size, data)
-
-directory_data
-
-# 1.3.2 Creating a data pointer -----
-
-directory_data %>%
-    filter(name == "application_train") %>%
-    select(data) %>%
-    unnest()
-
-get_data <- function(data_name) {
-    directory_data %>%
-        filter(name == data_name) %>%
-        select(data) %>%
-        unnest()
-}
-
-get_data("application_train")
-
-
-
-get_application_train <- function() {
-    get_data("application_train")
-}
-
-get_bureau <- function() {
-    get_data("bureau")
-}
-
-get_application_train() %>%
-    glimpse()
-
-get_bureau() %>%
-    glimpse()
-
-directory_data
-
-
-
 # 2.0 DATA EXPLORATION -----
 
 # Data Exploration Strategy PowerPoint / Visualization
 
-application_train_raw_tbl <- get_application_train()
+application_train_raw_tbl <- read_csv("00_data/application_train.csv")
 
 application_train_raw_tbl
-
-rm(directory_data)
 
 
 
@@ -198,16 +131,24 @@ string2factor_names
 
 # 3.0 PREPROCESSING ----
 
-# 3.1 Recipes ----
+# 3.1 Sampling ----
+set.seed(1234)
+split_obj <- initial_split(application_train_raw_tbl, prop = 0.15)
+
+training(split_obj) # 15% of Data
+testing(split_obj)  # 85% of Data
+
+# 3.2 Recipes ----
 
 # Show Resources: https://tidymodels.github.io/recipes/
 
-rec_obj <- recipe(TARGET ~ ., data = application_train_raw_tbl) %>%
+rec_obj <- recipe(TARGET ~ ., data = training(split_obj)) %>%
     step_num2factor(num2factor_names) %>%
     step_string2factor(string2factor_names) %>%
     step_meanimpute(all_numeric()) %>%
     step_modeimpute(all_nominal()) %>%
     step_discretize(all_numeric(), options = list(min_unique = 1)) %>%
+    step_nzv(all_predictors()) %>%
     step_dummy(all_nominal(), one_hot = TRUE) %>%
     prep(stringsAsFactors = FALSE)
 
@@ -216,10 +157,15 @@ tidy(rec_obj)
 tidy(rec_obj, number = 5) %>%
     filter(str_detect(terms, "AMT_CREDIT"))
 
-app_train_bake_tbl <- bake(rec_obj, application_train_raw_tbl)
+
+
+app_train_bake_tbl <- bake(rec_obj, training(split_obj))
 
 app_train_bake_tbl %>%
     glimpse()
+
+rm(application_train_raw_tbl)
+
 
 # 3.2 Correlation Analysis ----
 
@@ -274,7 +220,7 @@ feature_description_tbl %>%
     glimpse()
 
 # Credit Agencies: https://www.credit.com/credit-reports/credit-reporting-agencies/
-    
+
 
 # 3.4 Question Your Data: Days Birth Bin 4? ----
 
